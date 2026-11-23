@@ -24,5 +24,12 @@ upstream.
 | `flat-svg-logo`           | local                       |                                                |                                            |
 | `writing-commit-messages` | own                         |                                                |                                            |
 
+`implement` merges the upstream `implement`, `tdd`, `ub-mode` and `ponytail`
+skills. The `ub-mode` license (MIT) is kept as
+`skills/implement/LICENSE-ub-mode`. `ponytail` declares `license: MIT` in its
+frontmatter but shipped no LICENSE file.
+
+`CLAUDE.md` is my global instruction file, installed as `~/.claude/CLAUDE.md`.
+
 Upstream repos are on GitHub (`https://github.com/<upstream>`). Folder hashes
 come from `~/.agents/.skill-lock.json` (the `skills` CLI lockfile).

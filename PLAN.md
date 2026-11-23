@@ -12,6 +12,7 @@ no automatic sync with upstream. I may pull upstream changes in by hand later.
   (`writing-commit-messages`) and stops.
 - The agent looks up facts itself. Decisions are mine.
 - The agent asks before any outward-facing action (GitHub issues, PRs).
+- jj over git: in a repo with `.jj`, the agent uses jj commands.
 - Replies come back in Simplified Technical English (STE100).
 
 ## Desired workflows
@@ -99,7 +100,7 @@ A `CLAUDE.md` in this repo, installed as `~/.claude/CLAUDE.md`, with these
 sections only:
 
 1. Smallest change, no extras unless asked.
-2. Never commit or push; suggest a message instead.
+2. Prefer jj over git. Never commit or push; suggest a message instead.
 3. Look up facts yourself; ask me for decisions.
 4. Ask before any outward-facing action.
 5. Short STE100 rules for chat replies, specs and issues (commit messages keep

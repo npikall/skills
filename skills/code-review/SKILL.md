@@ -10,25 +10,26 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
-The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
-
 ## Process
 
 ### 1. Pin the fixed point
 
 Whatever the user said is the fixed point (a commit SHA, branch name, tag, `main`, `HEAD~5`, etc.). If they didn't specify one, ask for it.
 
-Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+If a `.jj` directory exists, use jj, not git: git's view of the working copy is misleading there.
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here, not inside two parallel sub-agents.
+- **jj**: diff command `jj diff --from 'fork_point(<fixed-point> | @)' --to @`; commit list `jj log -r '<fixed-point>..@'`; confirm the fixed point resolves with `jj log -r '<fixed-point>' --no-graph -n 1`.
+- **git**: diff command `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base); commit list `git log <fixed-point>..HEAD --oneline`; confirm the fixed point resolves with `git rev-parse <fixed-point>`.
+
+Capture the diff command and commit list once. Before going further, confirm the fixed point resolves and the diff is non-empty. A bad ref or empty diff should fail here, not inside two parallel sub-agents.
 
 ### 2. Identify the spec source
 
 Look for the originating spec, in this order:
 
-1. Issue references in the commit messages (`#123`, `Closes #45`, GitLab `!67`, etc.), fetched via the workflow in `docs/agents/issue-tracker.md`.
+1. GitHub issue references in the commit messages (`#123`, `Closes #45`), fetched with `gh issue view <number> --comments`.
 2. A path the user passed as an argument.
-3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
+3. A spec file under `.scratch/` matching the branch, bookmark, or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
 
 ### 3. Identify the standards sources
@@ -76,6 +77,8 @@ If the spec is missing, skip the Spec sub-agent and note this in the final repor
 Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings, because the two axes are deliberately separate (see _Why two axes_).
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes: that's the reranking the separation exists to prevent.
+
+If a finding is out of scope for this change (a bug elsewhere, a follow-up feature), draft a GitHub issue for it and ask the user before posting it with `gh issue create`.
 
 ## Why two axes
 
