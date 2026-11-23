@@ -4,6 +4,125 @@ My personal Claude Code skills. The skills in `skills/` are adapted from the
 upstream sources below. This repo owns them: there is no automatic sync with
 upstream.
 
+## How the skills work together
+
+The skills form one pipeline from an idea to a commit. Each stage writes an
+artifact that the next stage reads. The agent never commits. I commit myself.
+
+```
+idea
+  │
+  ▼
+/grill-me ─────────── or ─────────── /grill-with-docs
+  │ (grilling)                         │ (grilling + domain-modeling)
+  │                                    │  writes CONTEXT.md, docs/adr/
+  ▼                                    ▼
+shared understanding of the goal
+  │
+  ├── short task ──────────────────────────────┐
+  │                                            │
+  ▼  longer task                               │
+/to-spec    → .scratch/<slug>.md               │
+  │                                            │
+  ▼                                            │
+/to-tickets → .scratch/<slug>/issues/NN-*.md   │
+  │           (optional: GitHub issues)        │
+  ▼                                            ▼
+/implement  (TDD at agreed seams, codebase-design when needed)
+  │
+  ▼
+code-review (Standards axis + Spec axis)
+  │
+  ▼
+writing-commit-messages → I commit
+```
+
+The skills fall into three groups:
+
+- **Entry points.** I start these with a slash command. The model does not
+  start them by itself: `grill-me`, `grill-with-docs`, `to-spec`,
+  `to-tickets`, `handoff`.
+- **Building blocks.** Other skills call these with the Skill tool. The model
+  can also start them when a task fits: `grilling`, `domain-modeling`,
+  `codebase-design`, `implement`, `code-review`, `writing-commit-messages`.
+- **Standalone tools.** These are not part of the pipeline: `asd-ste100`,
+  `flat-svg-logo`.
+
+### Shared artifacts
+
+The skills do not pass state to each other directly. They read and write files
+in the project:
+
+| Artifact                        | Written by        | Read by                                  |
+| ------------------------------- | ----------------- | ---------------------------------------- |
+| `CONTEXT.md` (domain glossary)  | `domain-modeling` | `to-spec`, `to-tickets`, `implement`     |
+| `docs/adr/*.md` (decisions)     | `domain-modeling` | `to-spec`, `to-tickets`, `implement`     |
+| `.scratch/<slug>.md` (spec)     | `to-spec`         | `to-tickets`, `implement`, `code-review` |
+| `.scratch/<slug>/issues/*.md`   | `to-tickets`      | `implement`, `code-review`               |
+| `.metrics/`                     | `implement`       | `implement`                              |
+| handoff document in `$TMPDIR`   | `handoff`         | the next agent session                   |
+
+`.scratch/` and `.metrics/` are local working files. The skills add them to
+`.gitignore`, and they are never committed.
+
+### Shared rules
+
+All skills follow the same rules from `CLAUDE.md`:
+
+- The agent makes the smallest change that does the job.
+- The agent finds facts itself. Decisions are mine.
+- The agent asks before any action that leaves the machine, for example a
+  GitHub issue.
+- The agent uses jj in a repo with a `.jj` directory.
+- The agent never changes history. It suggests a commit message and stops.
+
+## A typical workflow
+
+### Short task
+
+1. Run `/grill-me` to agree on the goal. The agent asks questions in rounds
+   and gives a recommended answer for each. Use `/grill-with-docs` when the
+   task touches domain terms. That variant also updates `CONTEXT.md` and
+   offers ADRs.
+2. Confirm that the agent and I have a shared understanding.
+3. Run `/implement`. The agent proposes the seams to test at. I confirm them.
+4. The agent works in red-green slices. After each slice it runs `crapper`
+   and `dryer` on the touched code.
+5. At the end, the agent runs the full suite and `mutator`. Then it calls
+   `code-review`.
+6. The agent reports what it did and what it skipped. Then it suggests a
+   commit message.
+7. I review the change and commit it.
+
+### Longer task
+
+1. Run `/grill-me` or `/grill-with-docs` as above.
+2. Run `/to-spec`. The agent confirms the test seams with me and writes
+   `.scratch/<slug>.md`.
+3. Run `/to-tickets`. The agent proposes vertical slices with blocking
+   edges. I approve the breakdown.
+4. The agent writes one file per ticket under `.scratch/<slug>/issues/`. It
+   asks me, ticket by ticket, whether to post it to GitHub.
+5. For each ticket whose blockers are done, run `/implement` with the ticket
+   path. Each ticket ends with a review and a suggested commit message.
+6. I commit after each ticket.
+
+When a session gets long, run `/handoff` with a short note about the next
+step. Start a fresh session and point it at the handoff document.
+
+## Installation
+
+The `justfile` links the skills and `CLAUDE.md` into `~/.claude`:
+
+| Command               | Effect                                                 |
+| --------------------- | ------------------------------------------------------ |
+| `just status`         | List installed and tracked skills with their state.    |
+| `just install`        | Symlink the tracked skills and `CLAUDE.md`.            |
+| `just uninstall NAME` | Remove the symlink of a skill if it points to this repo. |
+| `just import NAME`    | Copy an installed skill into `skills/` and link it back. |
+
+`CLAUDE.md` is my global instruction file, installed as `~/.claude/CLAUDE.md`.
+
 ## Sources
 
 | Skill                     | Upstream                    | Path in upstream                               | Folder hash at import                      |
@@ -28,8 +147,6 @@ upstream.
 skills. The `ub-mode` license (MIT) is kept as
 `skills/implement/LICENSE-ub-mode`. `ponytail` declares `license: MIT` in its
 frontmatter but shipped no LICENSE file.
-
-`CLAUDE.md` is my global instruction file, installed as `~/.claude/CLAUDE.md`.
 
 Upstream repos are on GitHub (`https://github.com/<upstream>`). Folder hashes
 come from `~/.agents/.skill-lock.json` (the `skills` CLI lockfile).
