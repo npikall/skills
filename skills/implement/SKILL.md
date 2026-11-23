@@ -90,6 +90,9 @@ Pass the touched source paths to `crapper`, `dryer` and `mutator` as
 arguments. Their `--changed` flag reads `git status`, which is wrong in jj
 repos.
 
+These tools write `.metrics/` into the project root. If the repo's
+`.gitignore` does not already ignore `.metrics/`, add a `.metrics/` line to it.
+
 Run typechecking and single test files often. Run the full suite once at the
 end.
 
