@@ -6,7 +6,7 @@ upstream.
 
 ## How the skills work together
 
-The skills form one pipeline from an idea to a commit. Each stage writes an
+The skills form one pipeline from an idea to a pull request. Each stage writes an
 artifact that the next stage reads. The agent never commits. I commit myself.
 
 ```
@@ -38,13 +38,16 @@ code-review (Standards axis + Spec axis)
   │
   ▼
 writing-commit-messages → I commit
+  │
+  ▼
+I push → /open-pr → PR on GitHub (after my approval)
 ```
 
 The skills fall into three groups:
 
 - **Entry points.** I start these with a slash command. The model does not
   start them by itself: `grill-me`, `grill-with-docs`, `to-spec`,
-  `to-tickets`, `handoff`, `create-verification-skill`.
+  `to-tickets`, `handoff`, `create-verification-skill`, `open-pr`.
 - **Building blocks.** Other skills call these with the Skill tool. The model
   can also start them when a task fits: `grilling`, `domain-modeling`,
   `codebase-design`, `implement`, `no-comments`, `code-review`,
@@ -149,6 +152,7 @@ The `justfile` links the skills and `CLAUDE.md` into `~/.claude`:
 | `create-verification-skill` | `cursor/plugins`          | `pstack/skills/create-verification-skill`      | `5aa2dae2726d09d219397fbbedc1e9500a239d28` |
 | `flat-svg-logo`           | local                       |                                                |                                            |
 | `writing-commit-messages` | own                         |                                                |                                            |
+| `open-pr`                 | own                         |                                                |                                            |
 
 `implement` merges the upstream `implement`, `tdd`, `ub-mode` and `ponytail`
 skills. The `ub-mode` license (MIT) is kept as
