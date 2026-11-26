@@ -63,21 +63,45 @@ cmd_uninstall() {
   rm "$entry"
 }
 
-cmd_status() {
-  local tracked
+# Print $2 in the SGR color $1 if stdout is a terminal and NO_COLOR is unset.
+paint() {
+  if [[ -t 1 && -z ${NO_COLOR:-} ]]; then
+    printf '\e[%sm%s\e[0m\n' "$1" "$2"
+  else
+    echo "$2"
+  fi
+}
+
+# Read "state<TAB>name" lines. Print the names with state $1 under the header $3 in color $2.
+print_group() {
+  local names count
+  names=$(awk -F'\t' -v state="$1" '$1 == state { print "  " $2 }')
+  [[ -n $names ]] || return 0
+  count=$(wc -l <<<"$names" | tr -d ' ')
+  paint "$2" "$3 ($count)"
+  echo "$names"
+}
+
+entry_states() {
+  local tracked name
   tracked=$(tracked_names)
   for name in $( (echo "$tracked"; installed_names) | sort -u); do
-    if ! grep -qxF -- "$name" <<<"$tracked"; then
-      echo "$name: untracked"
-      continue
+    if grep -qxF -- "$name" <<<"$tracked"; then
+      printf '%s\t%s\n' "$(link_state "$installed/$name" "$repo/skills/$name")" "$name"
+    else
+      printf 'untracked\t%s\n' "$name"
     fi
-    case $(link_state "$installed/$name" "$repo/skills/$name") in
-      linked) echo "$name: linked" ;;
-      "not installed") echo "$name: tracked, not installed" ;;
-      conflict) echo "$name: conflict" ;;
-    esac
   done
-  echo "CLAUDE.md: $(link_state "$claude/CLAUDE.md" "$repo/CLAUDE.md")"
+  printf '%s\tCLAUDE.md\n' "$(link_state "$claude/CLAUDE.md" "$repo/CLAUDE.md")"
+}
+
+cmd_status() {
+  local entries
+  entries=$(entry_states)
+  print_group linked 32 linked <<<"$entries"
+  print_group untracked 2 untracked <<<"$entries"
+  print_group "not installed" 33 "tracked, not installed" <<<"$entries"
+  print_group conflict 31 conflict <<<"$entries"
 }
 
 cmd_import() {
