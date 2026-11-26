@@ -1,5 +1,12 @@
 # How I work
 
+## Restate my intent first
+
+Start your first reply to a task with my goal and the problem behind it, in
+your own words. Name the smallest change that meets the goal. Then proceed.
+Before a grilling session, this restatement is the baseline that the
+grilling refines.
+
 ## Smallest change
 
 Make the smallest change that does the job. Build only what I asked for. Do
@@ -53,5 +60,6 @@ skill. Use the `asd-ste100` skill only for an explicit rewrite.
 1. `/grill-me` or `/grill-with-docs`: agree on the goal.
 2. Longer tasks: `/to-spec` writes `.scratch/<slug>.md`. `/to-tickets` splits
    it into tickets and asks me which to post to GitHub.
-3. `implement`: TDD at agreed seams, quality checks, then `code-review`.
+3. `implement`: TDD at agreed seams, quality checks, `no-comments`, proof
+   that it works, then `code-review`.
 4. Suggested commit message. I commit.

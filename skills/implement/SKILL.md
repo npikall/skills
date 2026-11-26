@@ -40,8 +40,8 @@ Rules:
 - Do not bolt a new requirement onto a design that does not fit it. Ask what
   you would have built if it had been there from the start, and deliver that
   in pieces.
-- Mark a deliberate simplification with a known ceiling (global lock, O(n²)
-  scan) with a comment naming the ceiling and the upgrade path.
+- Write expressive code, not comments. Names, types and structure carry the
+  meaning. If code needs a comment to be understood, change the code.
 
 Never simplify away: input validation at trust boundaries, error handling that
 prevents data loss, security measures, or anything explicitly requested.
@@ -130,13 +130,20 @@ If an honest test is impractical, do not write a bad one. Say so.
 
 ## Finish
 
-1. Run the full test suite.
-2. Run `mutator` on the changed code. Cover the uncovered, kill the
+1. Call the Skill tool with "no-comments" on the changed code.
+2. Run the full test suite.
+3. Run `mutator` on the changed code. Cover the uncovered, kill the
    survivors, delete dead code.
-3. Call the Skill tool with "code-review" to review the work.
-4. If out-of-scope work turned up (a bug elsewhere, a follow-up feature),
+4. Prove it works. Check the real artifact: run the feature, read the actual
+   value, inspect the diff. Passing tests, "it compiles" and self-reports do
+   not count. If a check fails, suspect the check before the system. Script
+   the check when you can, and show its output to the user. If the project
+   has a `verify-<app>` skill, use it.
+5. Call the Skill tool with "code-review" to review the work.
+6. If out-of-scope work turned up (a bug elsewhere, a follow-up feature),
    draft a GitHub issue for each. Ask the user before posting any of them
    with `gh issue create`.
-5. Report briefly: what you did and why, what you skipped and when to add it.
-6. Call the Skill tool with "writing-commit-messages" to suggest a commit
+7. Report briefly: what you did and why, what you skipped and when to add it.
+   Include the proof from step 4.
+8. Call the Skill tool with "writing-commit-messages" to suggest a commit
    message. Stop.

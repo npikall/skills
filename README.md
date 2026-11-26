@@ -31,6 +31,9 @@ shared understanding of the goal
 /implement  (TDD at agreed seams, codebase-design when needed)
   │
   ▼
+no-comments → full suite, mutator → proof that it works
+  │
+  ▼
 code-review (Standards axis + Spec axis)
   │
   ▼
@@ -41,10 +44,11 @@ The skills fall into three groups:
 
 - **Entry points.** I start these with a slash command. The model does not
   start them by itself: `grill-me`, `grill-with-docs`, `to-spec`,
-  `to-tickets`, `handoff`.
+  `to-tickets`, `handoff`, `create-verification-skill`.
 - **Building blocks.** Other skills call these with the Skill tool. The model
   can also start them when a task fits: `grilling`, `domain-modeling`,
-  `codebase-design`, `implement`, `code-review`, `writing-commit-messages`.
+  `codebase-design`, `implement`, `no-comments`, `code-review`,
+  `writing-commit-messages`.
 - **Standalone tools.** These are not part of the pipeline: `asd-ste100`,
   `flat-svg-logo`.
 
@@ -88,7 +92,8 @@ All skills follow the same rules from `CLAUDE.md`:
 3. Run `/implement`. The agent proposes the seams to test at. I confirm them.
 4. The agent works in red-green slices. After each slice it runs `crapper`
    and `dryer` on the touched code.
-5. At the end, the agent runs the full suite and `mutator`. Then it calls
+5. At the end, the agent runs `no-comments`, the full suite and `mutator`.
+   It proves that the change works on the real artifact. Then it calls
    `code-review`.
 6. The agent reports what it did and what it skipped. Then it suggests a
    commit message.
@@ -140,6 +145,8 @@ The `justfile` links the skills and `CLAUDE.md` into `~/.claude`:
 | `ub-mode`                 | `unclebob/ub-mode`          | `.`                                            | `3da62bf3fcfd2034de41f30d920d2739e566171f` |
 | `ponytail`                | `dietrichgebert/ponytail`   | `skills/ponytail`                              | `cb6e53477eaf04e6daeca22feacb85f9ce20d40c` |
 | `asd-ste100`              | `danyuchn/asd-ste100-skill` | `.`                                            | `707362731928d0d92526c066df15dbbe6a378c07` |
+| `no-comments`             | `cursor/plugins`            | `pstack/skills/no-comments`                    | `6708dc37f8e2695b0063a60e06dcdc451eed5355` |
+| `create-verification-skill` | `cursor/plugins`          | `pstack/skills/create-verification-skill`      | `5aa2dae2726d09d219397fbbedc1e9500a239d28` |
 | `flat-svg-logo`           | local                       |                                                |                                            |
 | `writing-commit-messages` | own                         |                                                |                                            |
 
@@ -148,5 +155,13 @@ skills. The `ub-mode` license (MIT) is kept as
 `skills/implement/LICENSE-ub-mode`. `ponytail` declares `license: MIT` in its
 frontmatter but shipped no LICENSE file.
 
+`no-comments` puts the `pstack/agents/comment-sicko.md` agent
+(`14c2402f3d8c81b39d75747d6eb892f343e6a903`) inline as its subagent prompt.
+`implement` takes its "prove it works" step from
+`pstack/skills/principle-prove-it-works`
+(`71f6ab944f3fc9d5bb9b1b261edfa80ded54b96c`). The pstack license (MIT) is kept
+as `LICENSE-pstack` in both imported skills.
+
 Upstream repos are on GitHub (`https://github.com/<upstream>`). Folder hashes
-come from `~/.agents/.skill-lock.json` (the `skills` CLI lockfile).
+come from `~/.agents/.skill-lock.json` (the `skills` CLI lockfile). Hashes of
+the pstack skills come from the GitHub contents API.
