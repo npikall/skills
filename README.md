@@ -7,7 +7,9 @@ upstream.
 ## How the skills work together
 
 The skills form one pipeline from an idea to a pull request. Each stage writes an
-artifact that the next stage reads. The agent never commits. I commit myself.
+artifact that the next stage reads. By default the agent does not commit. I
+commit myself. `/to-skill` is the exception: it commits its own edits to this
+repo.
 
 ```
 idea
@@ -47,7 +49,8 @@ The skills fall into three groups:
 
 - **Entry points.** I start these with a slash command. The model does not
   start them by itself: `grill-me`, `grill-with-docs`, `to-spec`,
-  `to-tickets`, `handoff`, `create-verification-skill`, `open-pr`.
+  `to-tickets`, `handoff`, `create-verification-skill`, `open-pr`,
+  `to-skill`.
 - **Building blocks.** Other skills call these with the Skill tool. The model
   can also start them when a task fits: `grilling`, `domain-modeling`,
   `codebase-design`, `implement`, `no-comments`, `code-review`,
@@ -81,7 +84,10 @@ All skills follow the same rules from `CLAUDE.md`:
 - The agent asks before any action that leaves the machine, for example a
   GitHub issue.
 - The agent uses jj in a repo with a `.jj` directory.
-- The agent never changes history. It suggests a commit message and stops.
+- By default the agent suggests a commit message and stops. It commits only
+  when I ask or a skill tells it to.
+- The agent never touches bookmarks or branches, never pushes, and never
+  rebases or rewrites an existing change.
 
 ## A typical workflow
 
@@ -153,6 +159,7 @@ The `justfile` links the skills and `CLAUDE.md` into `~/.claude`:
 | `flat-svg-logo`           | local                       |                                                |                                            |
 | `writing-commit-messages` | own                         |                                                |                                            |
 | `open-pr`                 | own                         |                                                |                                            |
+| `to-skill`                | own                         |                                                |                                            |
 
 `implement` merges the upstream `implement`, `tdd`, `ub-mode` and `ponytail`
 skills. The `ub-mode` license (MIT) is kept as
